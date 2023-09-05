@@ -1,58 +1,72 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+  <div>
+    <h1>Car Price Prediction</h1>
+    <label for="brand">Brand:</label>
+    <input type="text" v-model="brand" id="brand" placeholder="Enter brand"><br><br>
+
+    <label for="fuel">Fuel:</label>
+    <input type="text" v-model="fuel" id="fuel" placeholder="Enter fuel type"><br><br>
+
+    <label for="gearbox">Gearbox:</label>
+    <input type="text" v-model="gearbox" id="gearbox" placeholder="Enter gearbox type"><br><br>
+
+    <label for="year">Year:</label>
+    <input type="text" v-model="year" id="year" placeholder="Enter year"><br><br>
+
+    <label for="mileage">Mileage (kms):</label>
+    <input type="text" v-model="mileage" id="mileage" placeholder="Enter mileage"><br><br>
+
+    <button @click="predictPrice">Predict Price</button><br><br>
+
+    <p v-if="price">Predicted Price: {{ price }}</p>
+    <p v-if="error">{{ error }}</p>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
+  data() {
+    return {
+      brand: '',
+      fuel: '',
+      gearbox: '',
+      year: '',
+      mileage: '',
+      price: null,
+      error: null
+    }
+  },
+  methods: {
+    async predictPrice() {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/predict', {
+          params: {
+            brand: this.brand,
+            fuel: this.fuel,
+            gearbox: this.gearbox,
+            year: this.year,
+            mileage: this.mileage
+          }
+        });
+
+        if (response.data.error) {
+          this.error = response.data.error;
+          this.price = null;
+        } else {
+          this.error = null;
+          this.price = response.data.price;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        this.error = 'An error occurred while making the prediction.';
+        this.price = null;
+      }
+    }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+/* CSS styles specific to this component */
 </style>
